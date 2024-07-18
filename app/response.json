@@ -1,0 +1,25 @@
+{
+    "users": [
+        {
+            "_id": "668d06b64c71c7f248db0109",
+            "email": "surajkumarjha771@gmail.com",
+            "username": "Suraj_07",
+            "password": "122",
+            "__v": 0
+        },
+        {
+            "_id": "668d06e54c71c7f248db0114",
+            "email": "surajkumarjha747@gmail.com",
+            "username": "suraj",
+            "password": "1222",
+            "__v": 0
+        },
+        {
+            "_id": "668d0bd609634d2fba013e38",
+            "email": "surajkumarjha772@gmail.com",
+            "username": "ajay",
+            "password": "1222",
+            "__v": 0
+        }
+    ]
+}
