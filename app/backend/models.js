@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
 
-    chatTo: [{
+    chats: [{
         type: String,
     }]
 })

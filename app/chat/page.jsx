@@ -15,11 +15,10 @@ export default function Chat() {
     const [message, setMessage] = useState('')
     const [selectedUserEmail, setSelectedUserEmail] = useState('')
     const [selectedUserName, setSelectedUserName] = useState('')
-    const [UserToChat, setUserToChat] = useState('')
     const [color, setColor] = useState('')
     const [receiveMsgArray, setreceiveMsgArray] = useState([])
     const [sendingemail, setSendingemail] = useState('')
-    const [receivingEmail, setReceivingEmail] = useState('')
+    // const [receivingEmail, setReceivingEmail] = useState('')
     let time = new Date()
     const socket = io('http://127.0.0.1:4000', {
         withCredentials: true
@@ -28,7 +27,7 @@ export default function Chat() {
     useEffect(() => {
 
         const fetchData = async () => {
-            const response = await fetch(`http://localhost:4000/chat?selectedUserEmail=${selectedUserEmail}`, {
+            const response = await fetch(`http://localhost:4000/chat`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,10 +36,9 @@ export default function Chat() {
             const data = await response.json()
             setAllUsers(data.users)
             setFilteredUsers(data.users)
-            setUserToChat(data.selectedUserEmail)
         }
         fetchData()
-        
+
     }, [])
 
     const handleSearch = (e) => {
@@ -76,23 +74,21 @@ export default function Chat() {
         }
 
         let colors = ['bg-red-400', 'bg-green-500', 'bg-yellow-400', 'bg-orange-600', 'bg-gray-400', 'bg-red-700', 'bg-emerald-500']
-        let color = colors[Math.floor(Math.random(0, 6) * 10)]
+        let color = colors[Math.floor(Math.random() * colors.length)]
         setColor(color)
 
         let email = localStorage.getItem('email')
         setSendingemail(email)
     }, [])
 
-    socket.on('user-message', (msg, email) => {
-        setUserToChat(email),
-            // setreceiveMsgArray([...receiveMsgArray, { msg, email }])
-            UserToChat.chatTo.push({sendingemail,msg});
-            console.log(UserToChat);
+    socket.on('user-message', (msg, toEmail, fromEmail) => {
+
+        setreceiveMsgArray([...receiveMsgArray, { msg, toEmail, fromEmail }])
     })
 
     const handleMessage = () => {
         if (message !== '') {
-            socket.emit('message', message, UserToChat.email)
+            socket.emit('message', message, selectedUserEmail, sendingemail)
             setMessage('')
         }
     }
@@ -102,7 +98,7 @@ export default function Chat() {
             <section>
                 <Sidebar />
                 <section className='flex justify-center items-center'>
-                    <section className='my-div h-screen w-2/6 bg-gray-50 ml-16 overflow-y-scroll overflow-x-hidden'>
+                    <section className='my-div h-screen w-2/6 bg-gray-50 ml-16 overflow-y-hidden overflow-x-hidden'>
                         <div className='bg-gray-50 w-full h-auto py-3 mt-16 items-center justify-between '>
                             <h2 className='text-2xl font-bold ml-8 w-full my-3 -mt-2'> Chats </h2>
                             <div className='flex justify-center px-7'>
@@ -125,7 +121,7 @@ export default function Chat() {
 
                     </section>
 
-                    <section className='h-screen w-4/6 overflow-y-scroll overflow-x-hidden my-div'>
+                    <section className='h-screen w-4/6 overflow-x-hidden my-div'>
                         <div className='w-full h-auto bg-gray-100 opacity-75 fixed top-16'>
                             <div className={`flex gap-4 w-60 justify-start items-center rounded-xl mt-1 py-1 px-4 cursor-pointer`}>
                                 <Avatar src='' />
@@ -137,28 +133,36 @@ export default function Chat() {
 
                         <div className='absolute top-20'>
 
-                            <div className={`my-div flex flex-col items-end space-y-4 h-[530px] w-4/6 overflow-y-scroll fixed right-7 top-20 px-3 py-2 font-black`}>
+                            <div className={`my-div flex flex-col items-end space-y-4 h-[530px] w-4/6 overflow-y-scroll fixed right-2 top-20 px-3 py-2 font-black`}>
                                 {
-                                        receiveMsgArray.map(({ msg, email }, index) => (
-                                            email === UserToChat ?
-                                                <div key={index} className='bg-green-400 w-fit self-end mt-10 mr-2 rounded-md px-3 py-2 font-medium'>
-                                                    {msg}
-                                                    <p className='text-xs text-gray-600 text-end'>
-                                                        {
-                                                            time.getHours() + ':' + time.getMinutes()
-                                                        }
-                                                    </p>
+                                    receiveMsgArray.map(({ msg, toEmail, fromEmail }, index) => (
+                                        ((fromEmail === sendingemail && toEmail === selectedUserEmail) || (fromEmail === selectedUserEmail && toEmail === sendingemail)) ?
+
+                                            fromEmail === sendingemail ?
+                                                <div className='w-full flex justify-end'>
+                                                    <div key={index} className='bg-green-400 w-fit mt-10 rounded-md px-3 py-2 font-medium'>
+                                                        {msg}
+                                                        <p className='text-xs text-gray-600 text-end'>
+                                                            {
+                                                                time.getHours() + ':' + time.getMinutes()
+                                                            }
+                                                        </p>
+                                                    </div>
                                                 </div> :
-                                                <div key={index} className='bg-green-400 ml-20 self-start w-fit mt-10 rounded-md px-3 py-2 font-medium'>
-                                                    {msg}
-                                                    <p className='text-xs text-gray-600 text-end'>
-                                                        {
-                                                            time.getHours() + ':' + time.getMinutes()
-                                                        }
-                                                    </p>
+                                                <div className='w-full flex justify-start'>
+                                                    <div key={index} className='bg-green-400 w-fit ml-16 mt-10 rounded-md px-3 py-2 font-medium'>
+                                                        {msg}
+                                                        <p className='text-xs text-gray-600 text-end'>
+                                                            {
+                                                                time.getHours() + ':' + time.getMinutes()
+                                                            }
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                        ))
-                        }
+
+                                            : ""
+                                    ))
+                                }
                             </div>
 
                             <div className='flex justify-center w-3/5 mx-auto items-center gap-7 fixed bottom-8 right-0'>

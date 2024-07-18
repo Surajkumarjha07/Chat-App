@@ -36,9 +36,9 @@ mongoose.connect("mongodb+srv://surajkumarjha771:MongoCompass@cluster0.eqrhtv8.m
 //Socket Connections
 
 io.on('connection', (socket) => {
-    socket.on('message', (msg,email) => {
-        io.emit('user-message', msg,email)
-        console.log('message arrived', msg,email);
+    socket.on('message', (msg, toEmail, fromEmail) => {
+        io.emit('user-message', msg, toEmail, fromEmail)
+        console.log('message arrived', msg, toEmail, fromEmail);
     })
 
 })
@@ -111,12 +111,10 @@ app.post('/login', async (req, res) => {
 })
 
 app.get('/chat', async (req, res) => {
-    const {selectedUserEmail} = req.query
-    let user = await users.find({email: selectedUserEmail})
     let allUsers = await users.find({})
 
+
     res.status(200).json({
-        selectedUserEmail: user,
         users: allUsers
     })
 
