@@ -22,21 +22,28 @@ import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
 import RoundaboutRightRoundedIcon from '@mui/icons-material/RoundaboutRightRounded';
 import { useState, useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
-import Image from 'next/image';
 import Link from 'next/link';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { toggleDarkMode } from '../redux/slices/darkMode';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 
 const drawerWidth = 240;
 
-const openedMixin = (theme) => ({
+const openedMixin = (theme, isDarkMode) => ({
   width: drawerWidth,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
+  backgroundColor: isDarkMode ? '#4B5563' : 'white',
+  color: isDarkMode ? 'white' : 'black'
 });
 
-const closedMixin = (theme) => ({
+const closedMixin = (theme, isDarkMode) => ({
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -46,6 +53,8 @@ const closedMixin = (theme) => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
+  backgroundColor: isDarkMode ? '#4B5563' : 'white',
+  color: isDarkMode ? 'white' : 'black'
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -53,7 +62,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'flex-end',
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
 }));
 
@@ -76,18 +84,18 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
+  ({ theme, open, isDarkMode }) => ({
     width: drawerWidth,
     flexShrink: 0,
     whiteSpace: 'nowrap',
     boxSizing: 'border-box',
     ...(open && {
-      ...openedMixin(theme),
-      '& .MuiDrawer-paper': openedMixin(theme),
+      ...openedMixin(theme, isDarkMode),
+      '& .MuiDrawer-paper': openedMixin(theme, isDarkMode),
     }),
     ...(!open && {
-      ...closedMixin(theme),
-      '& .MuiDrawer-paper': closedMixin(theme),
+      ...closedMixin(theme, isDarkMode),
+      '& .MuiDrawer-paper': closedMixin(theme, isDarkMode),
     }),
   }),
 );
@@ -105,6 +113,9 @@ export default function Sidebar() {
   const [token, setToken] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
+  const [color, setColor] = useState('')
+  const isDarkMode = useAppSelector(state => state.darkMode.isDarkMode)
+  const dispatch = useAppDispatch()
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -115,14 +126,14 @@ export default function Sidebar() {
   };
 
   const changePage = (index) => {
+    localStorage.setItem('storedIndex', index)
     setSelectedIndex(index)
-    localStorage.setItem('storedIndex', selectedIndex)
   }
 
   useEffect(() => {
     let storedIndex = localStorage.getItem('storedIndex')
     if (storedIndex !== null) {
-      setSelectedIndex(storedIndex)
+      setSelectedIndex(Number(storedIndex))
     }
 
     if (localStorage.getItem('token')) {
@@ -138,13 +149,21 @@ export default function Sidebar() {
     if (email) {
       setEmail(email)
     }
+
+    let colors = ['bg-red-400', 'bg-green-500', 'bg-yellow-400', 'bg-orange-600', 'bg-gray-400', 'bg-red-700', 'bg-emerald-500']
+    let color = colors[Math.floor(Math.random() * colors.length)]
+    setColor(color)
+
   }, [])
 
+  const handleChange = () => {
+    dispatch(toggleDarkMode())
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open} className='bg-green-700 shadow-none'>
+      <AppBar position="fixed" open={open} className={`${isDarkMode ? 'bg-gray-700' : 'bg-green-700'} shadow-none`}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -162,15 +181,44 @@ export default function Sidebar() {
             Chatin-Go
           </Typography>
 
+          <FormControlLabel control={<Switch />} label="Dark-Mode" onChange={handleChange} className='fixed right-32' />
+
           {
             token ?
-              <div className='flex gap-4 justify-center items-center absolute right-10'>
-                <Avatar src='/icon.gif' />
-                <div>
-                  <h2 className='text-lg font-semibold'> { username } </h2>
-                  <p className='text-sm'> { email } </p>
+              <div className='group fixed right-10 top-2 w-full cursor-pointer'>
+                <div className={`rounded-full fixed right-10 w-12 h-12 ${color} outline-dashed flex justify-center items-center text-2xl`}>
+                  {username[0].toUpperCase()}
+                </div>
+
+                <div className={`group-hover:block justify-center items-center gap-7 hidden rounded-lg ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-black'} w-fit px-4 h-32 fixed right-10 top-20`}>
+
+                  <div className='flex justify-end items-center gap-4 mt-2'>
+                    <Link href={'../updateUser'}>
+                      <button className='text-black bg-blue-100 px-2 py-2 rounded-full'>
+                        <EditRoundedIcon />
+                      </button>
+                    </Link>
+
+                    <Link href={'../deleteUser'}>
+                      <button className='text-red-600 bg-red-100 px-2 py-2 rounded-full'>
+                        <DeleteRoundedIcon />
+                      </button>
+                    </Link>
+                  </div>
+
+                  <div className='flex justify-center items-center gap-4 mt-4'>
+                    <div className={`rounded-full w-12 h-12 ${color} flex justify-center items-center text-2xl`}>
+                      {username[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <h2 className='text-lg font-semibold'> {username} </h2>
+                      <p className='text-sm'> {email} </p>
+                    </div>
+                  </div>
+
                 </div>
               </div> :
+
               <Link href={'/login'}>
                 <button className='flex gap-4 justify-center items-center absolute right-10 px-6 py-2 bg-white text-green-700 font-semibold rounded-md cursor-pointer -mt-5'>
                   Log In
@@ -179,7 +227,7 @@ export default function Sidebar() {
           }
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={open} isDarkMode={isDarkMode}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -188,10 +236,10 @@ export default function Sidebar() {
         <Divider />
         <List className={`${open === true ? 'px-4' : ''}`}>
           {menuItems.map((item, index) => (
-            <Link href={item.link}>
-              <ListItem key={index} disablePadding sx={{ display: 'block' }} className={`rounded-md ${selectedIndex === index ? 'bg-green-600 text-white' : ''}`} onClick={() => changePage(index)}>
+            <Link href={item.link} key={index}>
+              <ListItem key={index} disablePadding sx={{ display: 'block' }} className={`rounded-md ${selectedIndex === index ? `${isDarkMode ? 'bg-gray-500' : 'bg-green-600 text-white'} ` : ''}`} onClick={() => changePage(index)}>
                 <ListItemButton className='px-4'>
-                  <ListItemIcon className={`${selectedIndex === index ? 'text-white' : ''}`}>
+                  <ListItemIcon className={`${selectedIndex === index ? 'text-white' : ''} ${isDarkMode ? 'text-white' : ''}`}>
                     {
                       item.icon
                     }

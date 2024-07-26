@@ -19,7 +19,15 @@ const UserSchema = new mongoose.Schema({
     },
 
     chats: [{
-        type: String,
+        sender: {
+            type: String
+        },
+        receiver: {
+            type: String
+        },
+        userMsg: {
+            type: String
+        }
     }]
 })
 

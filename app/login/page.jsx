@@ -92,7 +92,7 @@ const Login = () => {
             <section className='flex justify-center items-center w-full h-full text-center overflow-y-hidden'>
 
                 <div className='w-1/2 h-screen flex justify-center items-center'>
-                    <Image src={'/login.gif'} width={700} height={700} />
+                    <Image src={'/login.gif'} width={700} height={700} alt='login'/>
                 </div>
 
                 <div className='w-1/2 h-screen flex justify-center'>

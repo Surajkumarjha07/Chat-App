@@ -36,11 +36,10 @@ mongoose.connect("mongodb+srv://surajkumarjha771:MongoCompass@cluster0.eqrhtv8.m
 //Socket Connections
 
 io.on('connection', (socket) => {
-    socket.on('message', (msg, toEmail, fromEmail) => {
-        io.emit('user-message', msg, toEmail, fromEmail)
-        console.log('message arrived', msg, toEmail, fromEmail);
+    socket.on('message', (sender, receiver, userMsg) => {
+        io.emit('user-message', sender, receiver, userMsg)
+        console.log('message arrived', sender, receiver, userMsg);
     })
-
 })
 
 app.get('/', (req, res) => {
@@ -77,7 +76,8 @@ app.post('/signUp', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     try {
-        let { email, password } = req.body;
+        let userData = req.body;
+        let { email, password } = userData;
         let existingUser = await users.findOne({ email })
 
         if (existingUser && password !== '' && email !== '') {
@@ -111,13 +111,124 @@ app.post('/login', async (req, res) => {
 })
 
 app.get('/chat', async (req, res) => {
+    let { fromUser,toUser,userMsg } = req.query;
+
     let allUsers = await users.find({})
+    let receiver = await users.findOne({ email: toUser })
+    let sender = await users.findOne({ email: fromUser })
+
+    if (userMsg && fromUser && toUser) {
+        
+        receiver?.chats?.push({ sender: sender.email, receiver: receiver.email, userMsg: userMsg })
+        sender?.chats?.push({ sender: sender.email, receiver: receiver.email, userMsg: userMsg })
+    
+        await receiver?.save()
+        await sender?.save()
+
+        let receiverChat = receiver? receiver.chats : null
+        let senderChat = sender? sender.chats : null
+        
+        res.status(200).json({
+            users: allUsers,
+            userMsg,
+            sender,
+            receiver,
+            receiverChat,
+            senderChat
+        })
+    }
+    else if (fromUser && toUser && userMsg === '') {
+        let receiverChat = receiver? receiver.chats : null
+        let senderChat = sender? sender.chats : null
+        
+        res.status(200).json({
+            users: allUsers,
+            receiverChat,
+            senderChat
+        })
+    }
+
+})
+
+app.put('/updateUser', async (req, res) => {
+    try {
+        let { userEmail, updatedEmail, updatedUsername, currentPassword, newPassword } = req.body
+        let user = await users.findOne({ email: userEmail })
+        let existingEmail = await users.findOne({ email: updatedEmail })
+        let existingUsername = await users.findOne({ username: updatedUsername })
 
 
-    res.status(200).json({
-        users: allUsers
-    })
+        let updatedUserData = {
+            $set: {
+                email: updatedEmail,
+                username: updatedUsername,
+                password: newPassword
+            }
+        }
 
+        if (updatedEmail && updatedUsername && currentPassword && newPassword) {
+            if (currentPassword === user?.password && !existingEmail && !existingUsername) {
+
+                let result = await users.updateOne(user, updatedUserData)
+                res.status(200).json({
+                    message: 'User updated',
+                    result
+                })
+            }
+            else if (existingEmail) {
+                res.status(402).json({
+                    message: 'Email already in use'
+                })
+            }
+            else if (existingUsername) {
+                res.status(403).json({
+                    message: 'Username already in use'
+                })
+            }
+            else if (currentPassword !== user?.password) {
+                res.status(401).json({
+                    message: 'Enter correct password'
+                })
+            }
+        }
+        else {
+            res.status(400).json({
+                message: 'Enter Details Correctly'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Internal Server Error'
+        })
+    }
+})
+
+app.delete('/deleteUser', async (req, res) => {
+    try {
+        let { password, userEmail } = req.body
+        let user = await users.findOne({ email: userEmail })
+
+        if (password) {
+            if (password === user?.password) {
+                await users.deleteOne(user)
+                res.status(200).json({
+                    message: 'user deleted successfully'
+                })
+            }
+            else if (password !== user?.password) {
+                res.status(401).json({
+                    message: 'Invalid Password'
+                })
+            }
+        }
+        else {
+            res.status(400).json({
+                message: 'Enter Credentials Correctly'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
 })
 
 
