@@ -97,7 +97,7 @@ export default function DeleteUser() {
 
                                 <label className='text-sm text-gray-500 font-semibold' htmlFor='password'> Enter Password </label>
                                 <br />
-                                <input type='text' placeholder='your username' name='password' className='h-12 mt-2 px-3 bg-customBg w-full placeholder:text-sm border-2 border-gray-200 rounded-md' value={password || ''} onChange={handlePassword} />
+                                <input type='text' placeholder='your password' name='password' className='h-12 mt-2 px-3 bg-customBg w-full placeholder:text-sm border-2 border-gray-200 rounded-md' value={password || ''} onChange={handlePassword} />
 
                                 <div className='text-center my-4'>
                                     <input type='submit' className='w-4/5 cursor-pointer bg-red-500 hover:bg-red-600 rounded-lg py-3 text-white font-semibold' value={'Delete Account'} />

@@ -185,7 +185,7 @@ export default function Sidebar() {
 
           {
             token ?
-              <div className='group fixed right-10 top-2 w-full cursor-pointer'>
+              <div className='group fixed right-10 h-44 top-2 w-full cursor-pointer'>
                 <div className={`rounded-full fixed right-10 w-12 h-12 ${color} outline-dashed flex justify-center items-center text-2xl`}>
                   {username[0].toUpperCase()}
                 </div>

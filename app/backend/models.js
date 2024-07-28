@@ -18,6 +18,11 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
 
+    profileImage: {
+        type: String,
+        required: false
+    },
+
     chats: [{
         sender: {
             type: String

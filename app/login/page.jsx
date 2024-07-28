@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import '../globals.css'
 import { Typography } from '@mui/material';
@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [token, setToken] = useState('')
     const router = useRouter()
 
     const handleEmail = (e) => {
@@ -87,8 +88,19 @@ const Login = () => {
         }
     }
 
+    useEffect(() => {
+      let token = localStorage.getItem('token')
+      if (token !== null) {
+        setToken(token)
+      }
+      
+    }, [])
+    
+
     return (
         <>
+        {
+            !token ?
             <section className='flex justify-center items-center w-full h-full text-center overflow-y-hidden'>
 
                 <div className='w-1/2 h-screen flex justify-center items-center'>
@@ -131,7 +143,8 @@ const Login = () => {
                     </form>
                 </div>
 
-            </section>
+            </section> : router.push('./chat')
+    }
         </>
     );
 }

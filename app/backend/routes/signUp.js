@@ -6,27 +6,40 @@ const cors = require('cors')
 app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use(cors())
 
-router.post('/signUp', async (req, res) => {
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    method: ["GET,POST,PUT,DELETE"],
+    credentials: true
+}
+
+app.use(cors(corsOptions))
+
+router.post('/', async (req, res) => {
     try {
-        let { email, password, confirmPassword } = req.body;
-        let existingUser = await users.findOne({email})
-        let NewUser = new users({email,password})
-        if (!existingUser && email !== '' && password !== '' && confirmPassword !== '' && password === confirmPassword) {
+        let { email, username, password } = req.body
+        let existingUserEmail = await users.findOne({ email })
+        let existingUsername = await users.findOne({ username })
+        let NewUser = new users({ email, username, password})
+        if (!existingUserEmail && !existingUsername && email !== '' && password !== '' && username !== '') {
             await NewUser.save()
             res.status(200).json({
                 message: 'User Created'
             })
         }
-        else if (existingUser && email !== '' && password !== '' && confirmPassword !== '' && password === confirmPassword) {
+        else if (existingUserEmail && email !== '' && password !== '' && username !== '') {
             res.status(409).json({
-                message: 'User Already Exists'
+                message: 'Email already in use'
             })
         }
-        else{
+        else if (existingUsername && email !== '' && password !== '' && username !== '') {
+            res.status(410).json({
+                message: 'Username already in use'
+            })
+        }
+        else {
             res.status(400).json({
-                message: 'Enter Details Correctly!'
+                message: 'Enter Details Correctly'
             })
         }
     } catch (error) {

@@ -19,7 +19,6 @@ export default function Chat() {
     const [color, setColor] = useState('');
     const [receiveMsgArray, setreceiveMsgArray] = useState([]);
     const [sendingemail, setSendingemail] = useState('');
-    const [data, setData] = useState([]);
     const isDarkMode = useAppSelector(state => state.darkMode.isDarkMode);
     const dispatch = useAppDispatch();
 
