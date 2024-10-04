@@ -161,7 +161,7 @@ export default function Sidebar() {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', zIndex: 5 }}>
       <CssBaseline />
       <AppBar position="fixed" open={open} className={`${isDarkMode ? 'bg-gray-700' : 'bg-green-700'} shadow-none`}>
         <Toolbar>
@@ -181,16 +181,16 @@ export default function Sidebar() {
             Chatin-Go
           </Typography>
 
-          <FormControlLabel control={<Switch />} label="Dark-Mode" onChange={handleChange} className='fixed right-32' />
+          <FormControlLabel control={<Switch />} label="Dark-Mode" onChange={handleChange} className='fixed right-32 z-20' />
 
           {
             token ?
-              <div className='group fixed right-10 h-44 top-2 w-full cursor-pointer'>
+              <div className='group w-fit fixed right-10 h-48 top-2 cursor-pointer'>
                 <div className={`rounded-full fixed right-10 w-12 h-12 ${color} outline-dashed flex justify-center items-center text-2xl`}>
                   {username[0].toUpperCase()}
                 </div>
 
-                <div className={`group-hover:block justify-center items-center gap-7 hidden rounded-lg ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-black'} w-fit px-4 h-32 fixed right-10 top-20`}>
+                <div className={`group-hover:block justify-center items-center gap-7 hidden rounded-lg ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-black'} w-fit px-4 h-32 fixed right-10 top-16`}>
 
                   <div className='flex justify-end items-center gap-4 mt-2'>
                     <Link href={'../updateUser'}>
